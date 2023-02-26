@@ -1,0 +1,23 @@
+.app {
+    display: flex;
+}
+.content {
+    align-self: center;
+}
+.nav_login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 0 0 20%;
+}
+.nav_login > div {
+    flex: 0 0 45%;
+    justify-self: center;
+}
+.nav_login a{
+    -webkit-transition: font-size 1s;
+    transition: font-size 1s;
+}
+.nav_login a:hover {
+    font-size: 15px;
+}

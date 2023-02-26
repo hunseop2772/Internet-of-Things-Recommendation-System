@@ -1,0 +1,10 @@
+[ LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } },
+  LinkedList { _length: 2, _head: Node { data: 'head', next: [Node] } } ]

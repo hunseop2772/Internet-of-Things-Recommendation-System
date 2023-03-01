@@ -1,0 +1,180 @@
+<html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <title>Classify Page</title>
+    </head>
+    <body>
+        <div id="mask" style = "opacity:0"></div>
+        <div class="app">
+            <div id="loading-container">
+                <div id = "measure-container">
+                    <div id="measure-message">재료를 올려주세요.</div>
+                    <input type="button" class="measure-button" value = "측정"/>
+                    <input type ="button" class="measure-button" value  = "측정하지 않음"/>
+                </div>
+                <div id="loading"></div>
+                <div id="loading-message">측정중...</div>
+            </div>
+            <div id="main_header">
+                <aside id="user_menu"></aside>
+                <h1>Classify Page</h1>
+                <button id="login_btn">로그인</button>
+            </div>
+            <ul class = "content"
+                style = "margin:0;padding:0;
+                        flex-direction:row;justify-content:flex-start;
+                        align-content:flex-start;flex-wrap:wrap;">
+             <% value.forEach((v)=>{%>
+            <li class = "ingrd_list">
+                <input type = "button" name = "<%= v %>" />
+                <strong><%= v%></strong>
+            </li>
+              <% }) %>
+            </ul>   
+            <div id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </div>
+        </div>
+        <script type = "text/javascript">
+        
+        $(document).ready(() => {
+        var loading_hide = function() {
+            $('#loading-container,#loading,#loading-message').hide();
+            $('#measure-container,#measure-button').show();
+          },wrapWindow = function() {
+            var maskHeight = $(document).height(),
+                maskWidth = $(window).width();
+            $('#mask').css({'width':maskWidth,'height':maskHeight});
+            $('#mask').fadeTo("slow",0);
+          },hide = jquery => $(jquery).hide(),
+            show = jquery => $(jquery).show(),
+            url = '../img/classify.png',
+            width_css = null,
+            height_css = null,
+            classify_id = `<%= classifyId %>`;
+
+            switch(classify_id) {
+                case "육류":
+                    width_css = 0;
+                    height_css = 0;
+                    break;
+                case "채소":
+                    width_css = 50;
+                    height_css = 0;
+                    break;
+                case "과일":
+                    width_css = 100;
+                    height_css = 55;
+                    break;
+                case "수산물":
+                    width_css = 0;
+                    height_css = 55;
+                    break;    
+                case "가공&amp;기타":
+                    width_css = 50;
+                    height_css = 55;
+                    break;
+                case "양념&amp;소스":
+                    width_css = 100;
+                    height_css = 0;
+                    break;
+                case "유제품":
+                    width_css = 0;
+                    height_css = 105;
+                    break;
+                default:
+                    width_css = 0;
+                    height_css = 0;
+                    break;
+            }
+        /* 초기화 */
+        $('.content').css('overflow','scroll');
+        $('#loading-container').hide();
+        $('.app').css('background','url()');
+        $('.ingrd_list > input')
+        .css('background-position',`${width_css}% ${height_css}%`);
+        $('#loading').hide();
+        $('#loading-message').hide();
+        /* 팝업 */
+        $('#mask').click(function() {
+            $(this).hide();
+            loading_hide();
+        })
+        /* 재료입력 */
+        let data = [],
+            inputData = (data,name,value) => Array.prototype.concat.call(data,[{name:name,value:value}]);
+        $('.ingrd_list > input').click((onClick) => {
+            var current = onClick.currentTarget.name,
+                classify_id = `<%= classifyId %>`;
+            /* form data */
+            data = [];
+            data = inputData(data,'name',current);
+            data = inputData(data,'classify_id',classify_id);
+                /* window */
+            wrapWindow();
+            $('#loading-container').show();
+    });
+    $('.measure-button').click((onClick)=>{
+        let measure = onClick.currentTarget.value;
+            if(measure === "측정") {
+                /* measure loading window */
+                hide('#measure-container');
+                show('#loading, #loading-message');
+                data = inputData(data,'measure',true);
+            } else {
+                data = inputData(data,'measure',false);
+                hide('#measure-container');
+            }
+            $.ajax({
+                url:"/processing",
+                data: data,
+                type: "get",
+                asnyc: false
+            }).done((data) => {
+                console.log(data);
+                if(data === 'success') {
+                    alert('등록이 완료되었습니다.');
+                } else if(data === 'fail') {
+                    alert('오류 발생');
+                } else if(data === 'update') {
+                    alert('재료가 수정되었습니다.');
+                } else if(data === 'exist'){
+                    alert('재료가 이미 등록되어 있습니다.');
+                }
+                loading_hide();
+                hide('#mask');
+            });
+    });       
+        $('#back').click(() => {
+            location.href = '/classify';
+        });
+        $('#reload').click(() => {
+            location.reload();
+        });
+        $('#user_menu').click(() => {
+            location.href = '/main';
+        });
+                  /* 로그인 관련 */
+        var user_id = `<%= user_id %>`;
+        
+        if(user_id) {
+            $('#login_btn').text('로그아웃');
+        }        
+            /* 로그인 로그아웃 버튼 변경 */
+        $('#login_btn').click(function() {
+            if($(this).text() === '로그인') {
+                location.href = '/login';
+            }
+            else {
+                location.href = '/logout';
+            }
+        });
+               
+        })
+        </script>
+    </body>
+</html>

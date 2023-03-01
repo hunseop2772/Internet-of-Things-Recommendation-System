@@ -1,0 +1,139 @@
+<html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <title>Find User Page</title>
+    </head>
+    <body>
+        <div class = "app">
+            <header id = "main_header">
+                <aside id="user_menu"></aside>
+                <h1>MainPage</h1>
+                <button id="login_btn">로그인</button>
+            </header>
+            <div class = "content">
+                <div class = "select_method">
+                    <div class="findId">아이디 찾기</div>
+                    <div class="findPwd">비밀번호 찾기</div>  
+                </div>
+                <form class = "find_list">
+                    <div>
+                        <strong>아이디</strong>
+                        <input type="text" name ="user_id"/>
+                    </div>
+                    <div>
+                        <strong>이름</strong>
+                        <input type="text" name ="user_name"/>    
+                    </div>
+                    <div>
+                        <strong>가입시 등록한 이메일</strong>
+                        <input type="email" name ="user_email"/>
+                    </div>                        
+                    <nav>
+                        <input type="submit" value = "확인">
+                        <input type="button" id = "cx" value = "취소">
+                    </nav>                        
+                </form>
+            </div>
+            <nav id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </nav>
+        </div>
+        <script>
+            /* function */
+        var css = function(jquery,css) {
+            for(var i =0,len = css.length;i<len;i++) {
+                jquery.css(css[i]);
+            }
+        }, background = function(val) {
+            var obj = {};
+            obj.background = val;
+            return obj;
+        },backgroundSize = function(val) {
+            var obj = {};
+            obj['background-size'] = val;
+            return obj;
+        }, outputObject = function(func) {
+            var obj = [];
+            for(var i = 0,len = func.length;i<len;i++) {
+                obj.push(func[i]);
+            }
+            return obj;
+        },eq = function(jquery,val) {
+            var eq  = jquery.eq(val);
+            return eq;
+        }, hide = function(jquery){
+            return jquery.hide();
+        }, show = function(jquery) {
+            return jquery.show();
+        }; obj = function(key,val) {
+            var obj = {};
+            obj[key] = val;
+            return obj;
+        }
+            $(document).ready(function() {
+                /* 변수 */
+                var check_select = outputObject([
+                    background(`url(../img/Trapezoid_check.png) center no-repeat`),
+                    backgroundSize('100% 100%')
+                ]),not_check_select = outputObject([
+                    background(`url('../img/Trapezoid.png') no-repeat center`),
+                    backgroundSize('100% 100%')
+                ]),hided_column = eq($('.find_list > div'),0),
+                    submit_button = eq($('ul button nav'),0),
+                    cancle_button = eq($('ul button nav'),1),
+                    submit_data = [];
+                /* 초기상태 */
+                $('.app').css('background','url()');
+                css($('.findId'),check_select);
+                hide(hided_column);
+                /* 아이디 비번 찾기 버튼 눌르시 */
+                $('.findId').click(() => {
+                    hide(hided_column);
+                    css($('.findId'),check_select);
+                    css($('.findPwd'),not_check_select);
+                });
+                $('.findPwd').click(() => {
+                    show(hided_column);
+                    css($('.findPwd'),check_select);
+                    css($('.findId'),not_check_select);
+                })
+                /* 확인 및 취소 버튼 눌르시 */
+                $('form').submit(e => {
+                    e.preventDefault();
+                    submit_data = $('form').serialize();
+                    var url = '/db_findUser/';
+
+                    $.get(url,submit_data).then((data) => {
+                        if(typeof data === 'object'){
+                            alert(`사용자의 아이디는 ${data[0].user_id}입니다`);
+                        }
+                    });
+                });
+                $('#cx').click(() => {
+                    location.href = '/login';
+                })
+                /* 로그인 관련 */          
+                    /* 로그인 로그아웃 버튼 변경 */
+                $('#login_btn').click(function() {
+                    if($(this).text() === '로그인') {
+                        location.href = '/login';
+                    }
+                })
+                /* 푸터 및 네비 관련 */
+                $('#user_menu').click(() => {
+                    location.href = '/login';
+                })
+                $('#back').click(() => {
+                location.href = '/login';
+                });
+                $('#reload').click(() => {
+                    location.reload();
+                });
+            })
+        </script>
+    </body>
+</html>

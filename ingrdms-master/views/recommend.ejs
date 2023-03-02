@@ -1,0 +1,98 @@
+<html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <title>Recommend Page</title>
+    </head>
+    <body>
+        <div id="recommend_img">
+            <div>레시피 추천 방식을 선택하세요.</div>
+        </div>
+        
+        <div class = "app">
+            <header id = "main_header">
+                <aside id="user_menu"></aside>
+                <h1>Recommend</h1>
+                <button id="login_btn">로그인</button>
+            </header>
+            <div class = "content">
+               <div id="toContent">
+                   <nav name = "right">
+                       <span>내 냉장고 속 재료</span>
+                   </nav>
+               </div>
+               <div id="toUBCF">
+                   <nav name = "left">
+                    <span> 사용자 주변 추천</span>
+                   </nav>
+               </div>
+               <div id="toIBCF">
+                   <nav name="center">
+                       <span>레시피 기반 추천</span>
+                   </nav>
+               </div>
+            </div>
+            <nav id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </nav>
+        </div>
+        <script>
+            $(document).ready(() => {
+                /*  푸터 및 네비 관련   */
+            $('#reload').click(() => {
+                location.reload();
+            });
+            $('#user_menu').click(() => {
+                location.href = '/main';
+            });
+            $('#back').click(() => {
+                location.href = '/main';
+            }) 
+                /* 로그인 관련 */
+            var user_id = `<%= user_id %>`;
+            if(user_id) {
+                $('#login_btn').text('로그아웃');
+            } 
+            /* 로그인 로그아웃 버튼 변경 */
+            $('#login_btn').click(function() {
+                if($(this).text() === '로그인') {
+                    location.href = '/login';
+                }
+                else {
+                    location.href = '/logout';
+                }
+                
+            });
+                /* content 관련 */
+            /* FADE */
+            $('#recommend_img div').fadeTo(900,1,() => {
+                $('#toContent').fadeTo(900,1,() => {
+                    $('#toUBCF').fadeTo(900,1,() => {
+                        $('#toIBCF').fadeTo(900,1);
+                    })
+                })
+            });
+            /* CLICK */
+            $('.content nav').click(function() {
+                var direction = $(this).attr('name');
+                if(direction === 'right') {
+                    console.log('to Content');
+                    location.href = 'recommend/content';
+                } 
+                else if(direction === 'left') {
+                    console.log('to UBCF');
+                    location.href = 'recommend/ubcf';
+                } 
+                else {
+                    console.log('to IBCF');
+                    location.href = 'recommend/ibcf';
+                }
+            })
+        });
+            
+        </script>
+    </body>
+</html>

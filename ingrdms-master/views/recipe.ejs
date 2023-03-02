@@ -1,0 +1,113 @@
+<html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/recipe.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <title>Recipe Page</title>
+    </head>
+    <body>
+        <div class = "app">
+            <header id = "main_header">
+                <aside id="user_menu"></aside>
+                <h1>Recipe</h1>
+                <button id="login_btn">로그인</button>
+            </header>
+            <div class = "content" style ="justify-content: flex-start">
+              <h1>이런 레시피는 어때요?</h1>
+              <ul>
+              </ul>
+            </div>
+            <nav id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </nav>
+        </div>
+        <script>
+            $(document).ready(() => {
+                /* 초기화 */
+                let user_id = '<%= user_id %>',
+                    way = '<%= way %>',
+                    cookie = {};
+                processRecommend();
+                /* 로그인 관련 */
+                if(user_id) {
+                    $('#login_btn').text('로그아웃');
+                }
+                /* 로그인 로그아웃 버튼 */
+                $('#login_btn').click(function() {
+                    if($(this).text() === '로그인') {
+                        location.href = '/login';
+                    }
+                    else {
+                        location.href = '/logout';
+                    }
+                })
+                /* 네비게이션 버튼 */
+                $('#back').click(() => {
+                    location.href = '/recommend';
+                });
+                $('#reload').click(() => {
+                    location.reload();
+                });
+                $('#user_menu').click(() => {
+                    location.href = '/main';
+                })
+                function processRecommend() {
+                    $.ajax({
+                        url: "/process_recommend",
+                        type: "GET",
+                        data: {way:way},
+                        success: function(data) {
+                            console.log(data);
+                            /* data 처리 */
+                            data.forEach((value) => {
+                                let recipe_id = value.recipe_id,
+                                    recipe_name = value.recipe_name,
+                                    time = value.time,
+                                    amount = value.amount,
+                                    level = value.level,
+                                    img = value.img_url;
+                                cookie[recipe_name] = recipe_id;
+                                $('.content ul').append(`
+                                <li>
+                                    <h3>${recipe_name}</h3>
+                                    <div name = "image"
+                                    style = "background:url('${img}');
+                                    background-size: 100% 100%">
+                                    </div>
+                                    <div name = "description">
+                                        <span>${amount}</span>
+                                        <span>${time}</span>
+                                    </div>
+                                </li>`);
+                            });
+                            //Finish data forEach  
+                            $('li').click(e => {
+                                let recipe_name = e.currentTarget.children[0].textContent,
+                                    recipe_id = cookie[recipe_name],
+                                    select = null;
+                                select = confirm('이 레시피를 선택하시겠습니까?');
+                                if(select) {
+                                    $.ajax({
+                                    url: "/enrollRecipe",
+                                    data: {user_id: user_id,recipe_id: recipe_id},
+                                    type: "GET",
+                                }).done((data) => {
+                                    if(data !== 'error') {
+                                        alert('레시피가 선택되었습니다!');
+                                    }
+                                    else {
+                                        alert('오류!');
+                                    }
+                                })
+                                }
+                                
+                            })
+                        },
+                    });
+                }
+            })
+        </script>
+    </body>
+</html>

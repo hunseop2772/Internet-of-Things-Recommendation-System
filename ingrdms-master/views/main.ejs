@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <title>Main Page</title>
+    </head>
+    <body>
+        <div class = "app">
+            <header id = "main_header">
+                <aside id="user_menu"></aside>
+                <h1>MainPage</h1>
+                <button id="login_btn">로그인</button>
+            </header>
+            <div class = "content">
+                <input type="button" class = "service_btn" value = "냉장고 관리"/>
+                <input type="button" class = "service_btn" value = "레시피 추천"/>
+            </div>
+            <nav id = "main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </nav>
+        </div>
+        <script>
+            $(document).ready(() => {
+                $('.app').css('background',`url('../img/main_page.png') center no-repeat`);
+                $('.app').css('background-size','90vw 90vh');
+                $('.service_btn').click((handler) => {
+                    var target =  handler.currentTarget.value;
+                    if(target[0] === '냉') {
+                        location.href = '/refrigerator';
+                    }
+                    else {
+                        location.href = '/recommend';
+                    }
+                });
+                $('#reload').click(() => {
+                    location.reload();
+                });
+                $('#user_menu').click(() => {
+                 location.href = '/main';
+                }); 
+                /* 로그인 관련 */
+            var user_id = `<%= user_id %>`;                
+            if(user_id) {
+                $('#login_btn').text('로그아웃');
+            }            
+                /* 로그인 로그아웃 버튼 변경 */
+            $('#login_btn').click(function() {
+                if($(this).text() === '로그인') {
+                    location.href = '/login';
+                }
+                else {
+                    location.href = '/logout';
+                }
+                
+            })
+            })
+        </script>
+    </body>
+</html>

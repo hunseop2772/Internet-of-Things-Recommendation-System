@@ -1,0 +1,100 @@
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+    <link rel="stylesheet" href="/css/index.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+    <title>Sign UP Page</title>
+</head>
+<body>
+    <div class="app">
+        <header id="main_header">
+            <aside id="user_menu"></aside>
+            <h1>Sign Up Page</h1>
+            <button id="login_btn">로그인</button>
+        </header>
+        <div class = "content" style="justify-content:center">
+            <form class = "find_list" >
+                <div>
+                    <strong>아이디</strong>
+                    <input type="text" name = "id"required autofocus>
+                </div>
+                <div>
+                    <strong>이름</strong>
+                    <input type="text" name = "name" required>
+                </div>
+                <div>
+                    <strong>이메일</strong>
+                    <input type="text" name = "e_mail" required>
+                </div>
+                <div>
+                    <strong>비밀번호</strong>
+                    <input type="password" name = "pwd" required>
+                </div>
+                <div>
+                    <strong>비밀번호 확인</strong>
+                    <input type="password" name = "check_pwd" required>
+                </div>
+                <nav>
+                    <input type="submit" value = "확인">
+                    <input type="button" id = "cx" value = "취소">
+                </nav>
+            </form>
+        </div>
+        <nav id = "main_footer">
+            <input type="button" id="back"/>
+            <input type="button" id="reload"/>
+        </nav>
+    </div>
+</body>
+<script>
+    $(document).ready(() => {
+        /* FORM */
+        $('form').submit((e) => {
+            e.preventDefault();
+            var data = $('form').serialize(),
+                data_arr = $('form').serializeArray(),
+                flag = data_arr[3].value === data_arr[4].value;
+            
+            if(flag){
+                $.ajax({
+                url: '/db_signup',
+                type: "POST",
+                data: data,
+                success : function(data) {
+                    console.log(data);
+                    if(data === 'success') {
+                        alert('회원등록이 완료되었습니다.');
+                        location.href = '/login';
+                    } else if(data === 'exist') {
+                        alert('이미 등록된 회원입니다.');
+                        location.reload();
+                    }
+                }
+            });
+            }
+            else {
+                alert('비밀번호가 일치하지 않습니다.');
+            }
+           
+        })
+        /* Navigation Header Btn */
+        $('#login_btn').click(function() {
+            if($(this).text() === '로그인') {
+                location.href = '/login';
+            }
+        });
+        /* Navigation Footer Btn */
+        $('#back').click(() => {
+            location.href = '/login';
+        });
+        $('#reload').click(() => {
+            location.reload();
+        });
+        /* Button */
+        $('#cx').click(function() {
+            location.href = '/login';
+        })
+    })
+</script>
+</html>

@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <title>Welcome</title>
+    </head>
+    <body>
+        <div class = "app">
+            <div id="welcome_img"></div>
+            <div class = "content">
+                <div class = "blink">
+                <a href = "/login"><p class = "event listening">시작하기</p></a>
+                </div>
+            </div>
+        </div>
+        <script>
+            $(document).ready(() => {
+                $('.app').css('background',`url('../img/welcome_page.png') center no-repeat`);
+                $('.app').css('background-size','100vw 100vh');
+            })
+        </script>
+    </body>
+</html>

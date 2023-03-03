@@ -1,0 +1,422 @@
+ <html>
+    <head>
+        <meta charset = "utf-8" />
+        <meta name = "viewport" content = "user-scalable=no, initial-scale = 1.0, width = device-width, minimum-scale = 1.0, maximum-scale = 1.0"/>
+        <link rel="stylesheet" type="text/css" href="/css/index.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+        <title>Refrigerator Page</title>
+    </head>
+    <body>
+        <div id="mask"></div>
+        <div id="popup">
+           <div>
+               <div class = "ingrd_information">
+                   <div style = "border: 1px solid black">
+                   </div>
+               </div>
+               <h1></h1>
+               <h1 class="data-weight"></h1>
+           </div>
+           <div>
+               <strong>소비기한</strong>
+               <input type="date" id="date"/>
+           </div>
+           <div>
+               <div class="btn">
+                   <img src="../img/check_icon.png" alt="">
+                   <h1>확인</h1>
+               </div>
+               <div class="btn">
+                   <img src="../img/trash_icon.png" alt="">
+                   <h1>삭제</h1>
+               </div>
+           </div>
+        </div>
+        <a href="/classify"><input type="button" class = "circle" style ="font-size:20px;" value ="+"></a>
+        <div class="slideButton"></div>
+        <div class="slideButton"></div>
+        <div class="app">    
+            <header id="main_header">
+                <aside id="user_menu"></aside>
+                <h3>Refrigerator</h3>
+                <button id = "login_btn">로그인</button>
+            </header>
+            <div class ="content" id = "frozen">
+                <% for (var i = 4; i>0;i--) { %>
+                    <div class="column">
+                        <div class="floor">
+                            <a href="/classify" style = "align-self:center">
+                                <input type="button" class="circle" style = "font-size:20px"
+                                value = "+">
+                            </a>
+                        </div>
+                        <div class="line">
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            <div class="content" id = "fresh">
+            <% for(var i = 4 ;i > 0;i--){ %>
+                <div class="column">
+                    <div class="floor" id = <%= i %>>
+
+                    </div>
+                    <div class="line"></div>
+                </div>
+            <% } %>
+            </div>
+            <nav id="main_footer">
+                <input type="button" id="back"/>
+                <input type="button" id="reload"/>
+            </nav>
+        </div>
+        <script type = "text/javascript">
+        
+        $(document).ready(function() {
+            /* 초기화 */
+            var cookie = {},
+                user_id = '<%= user_id %>';
+            $('#popup').hide();
+            $('#frozen').hide();
+                /* 슬라이드 버튼 초기화*/
+            var rightSlideButton = $('.slideButton').eq(1),
+                slide = 1;
+            function hide(jquery) {
+                var result = $(jquery);
+                return result.hide();
+                
+            }
+            function showFade(jquery,time) {
+                var result = $(jquery);
+                return result.fadeIn(time);
+            };
+            function changeText(jquery,text) {
+                var result = $(jquery);
+                return result.text(text);
+            }
+            function nextSlide() {
+                if(slide) {
+                    slide = 0;                    
+                    hide('#fresh')
+                    showFade('#frozen',1000);
+                    changeText('#main_header > h3','Freezer');
+
+                } else if(!slide) {
+                    slide = 1;
+                    hide('#frozen');
+                    showFade('#fresh',1000);
+                    changeText('#main_header > h3','Refrigerator');
+                }
+            }
+            rightSlideButton.css('transform','rotate(-180deg)');
+            rightSlideButton.css('right','0');
+                /* click Slide Button */
+            $('.slideButton').click((event) => {
+                nextSlide();
+            });
+            /* Get Recipe */
+            $.ajax({
+                url: "/getRecipe", 
+                data: { user_id: user_id},               
+                type: "GET",                             
+                dataType: "json",
+                async: false,
+                success: function(data) {
+                var id = null,
+                    insert_element = null,
+                    state_bar = null,
+                    date_diff = null,
+                    day = 1000*60*60*24,
+                    today = new Date(),
+                    
+                today = getDate(today);
+                /* DataBase Data 처리 */
+            data.forEach((value)=>{
+                var ingrd_object = {
+                    expiry_date: value.expiry_date,
+                    sensor_id: value.sensor_id,
+                    classify: value.classify_id
+                };
+                    cookie[value.ing_name] = ingrd_object,
+                    css = {
+                    width: 0,
+                    height: 0
+                };
+                /* 위치 계산 */
+                id = numberToString(setLocation(value.sensor_id));
+                console.log('id is: ',id);
+                /*  날짜 계산 */
+                date_diff = calcDate(value.expiry_date,today);
+                console.log(`${value.ing_name}의 남은 일수 ${date_diff}`);
+                /*  상태 설정  */
+                state_bar = setStateBar(date_diff);
+                /* classify 계산 */
+                console.log(value.classify_id);
+                /* css 수정 */
+                css = get_width_height(value.classify_id);
+                /* 각 자리에 넣을 재료들  */
+                insert_element = `
+                <div class = "recipe_item">
+                    <input type = "button" class = "ingrd_thumb"
+                    style = "border: 5px solid ${state_bar};
+                             background-position: ${css.width}% ${css.height}%"/>
+                    <strong>${value.ing_name}</strong>
+                </div>`
+                $(insert_element).prependTo(`#${id}`);
+                });
+                function getDate(today) {
+                    return new Date(today.getFullYear(),today.getMonth(),today.getDate());
+                }
+                function get_width_height(classify_id) {
+                        var width_css= 0,
+                            height_css = 0,
+                            result ={};
+                        switch(classify_id) {
+                            case "육류":
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                    case "채소":
+                        width_css = 50;
+                        height_css = 0;
+                        break;
+                    case "과일":
+                        width_css = 100;
+                        height_css = 55;
+                        break;
+                    case "수산물":
+                        width_css = 0;
+                        height_css = 55;
+                        break;    
+                    case "가공&amp;기타":
+                        width_css = 50;
+                        height_css = 55;
+                        break;
+                    case "양념&amp;소스":
+                        width_css = 100;
+                        height_css = 0;
+                        break;
+                    case "유제품":
+                        width_css = 0;
+                        height_css = 105;
+                        break;
+                    default:
+                        width_css = 0;
+                        height_css = 0;
+                        break;
+                        }
+                        result['width'] = width_css;
+                        result['height'] = height_css;
+                        return result;
+                    };
+                function calcDate(date,today) {
+                    var date_arr = date.split('-'),
+                        date_diff = null,
+                        day = 1000*60*60*24;
+                    date = new Date(date_arr[0],parseInt(date_arr[1])-1,date_arr[2]);
+                    date_diff = parseInt((date - today) /day);
+                    return date_diff;
+                }
+                function setStateBar(diff_date) {
+                    let result = null;
+                    if(date_diff < 3 && date_diff >= 1) {
+                    result = '#FFFF19';
+                    } else if(date_diff < 1) {
+                    result = 'red';
+                    } else {
+                        result = 'green';
+                    }
+                    return result;
+                }
+                function setLocation(sensor_id) {
+                    var result = null;
+                    if(typeof sensor_id === 'string') {
+                        sensor_id = sensor_id.split('_')[0];
+                        result = sensor_id;
+                    }
+                    else {
+                        result = 4;
+                    }
+                    return result;
+                }
+                function numberToString(value) {
+                    var result = null;
+                    console.log(value);
+                    if(typeof value === 'number') {
+                        result = value.toString();
+                    } 
+                    else {
+                        result = parseInt(value);
+                    }
+                    return result;
+                }
+                }
+            });
+            /*  팝업  */
+            function wrapWindow() {
+            var maskHeight = $(document).height(),
+                maskWidth = $(window).width();
+            $('#mask').css({'width':maskWidth,'height':maskHeight});
+            $('#mask').fadeTo("slow",0.5);
+        }
+            /* 재료를 클릭했을 때 */
+            $('.floor > .recipe_item').click(function(e) {
+                e.preventDefault();
+                var width = $('.app').width(),
+                    height = $('.content').height(),
+                    windowHeight = $(window).height(),
+                    ing_name = $(this).children('strong').text(),
+                    reg_date = cookie[ing_name].expiry_date,
+                    sensor_id = cookie[ing_name].sensor_id,
+                    weight = null,
+                    weight_string = null,
+                    classify_id = null,
+                    css = {
+                        width: 0,
+                        height: 0,},
+                    
+                /* 분류 데이터 처리 */
+                classify_id = cookie[ing_name].classify;
+                css = get_width_height(classify_id);
+                /* 무게 정보 가져오기 AJAX */
+                $.ajax({
+                    url: "/getWeight",
+                    data: {user_id: user_id, ingrd_name: ing_name, sensor_id: sensor_id},
+                    type: "GET",
+                    dataType: "json",
+                    async: false,
+                    success: function(data) {
+                        console.log('getWeight Data is: ',data);
+                        if(data !== '') {
+                            weight_string = setWeightString(data);    
+                        }
+                        else {
+                            weight_string = '';
+                        }
+                    }
+                });
+
+                $('.ingrd_information > div').css('background-position',`${css.width}% ${css.height}%`);
+                $('#popup > div').eq(0).children('h1').eq(0).text(ing_name);
+                $('#popup > div').eq(0).children('h1').eq(1).text(weight_string);
+                $('#popup > div').eq(1).children('input').val(reg_date);
+                wrapWindow();
+                $('#popup').css(
+                    {'width':width,
+                    'height':windowHeight/2});
+                $('#popup').animate({top:windowHeight}).promise().then(()=>{
+                    return $('#popup').show().animate({top:windowHeight/2},500);
+                });
+                function get_width_height(classify_id) {
+                    var width_css = null,
+                        height_css = null;
+
+                    switch(classify_id) {
+                        case "육류":
+                            width_css = 0;
+                            height_css = 0;
+                            break;
+                        case "채소":
+                            width_css = 50;
+                            height_css = 0;
+                            break;
+                        case "과일":
+                            width_css = 100;
+                            height_css = 55;
+                            break;
+                        case "수산물":
+                            width_css = 0;
+                            height_css = 55;
+                            break;    
+                        case "가공&amp;기타":
+                            width_css = 50;
+                            height_css = 55;
+                            break;
+                        case "양념&amp;소스":
+                            width_css = 100;
+                            height_css = 0;
+                            break;
+                        case "유제품":
+                            width_css = 0;
+                            height_css = 105;
+                            break;
+                        default:
+                            width_css = 0;
+                            height_css = 0;
+                            break;
+                    }
+                    var result = {};
+
+                    result['width'] = width_css;
+                    result['height'] = height_css;
+
+                    return result; 
+                };
+                function setWeightString(weight) {
+                    let result = null,
+                        predi = (value) => {
+                            if(value >= 1000) return (value/1000) + 'kg';
+                            else return value + 'g';
+                        };
+                    if(typeof weight === 'string') {
+                        weight = parseInt(weight);
+                        result = predi(weight);
+                    }
+                    else if(typeof weight === 'number') {
+                        weight = weight.toFixed(0);
+                        result = predi(weight);
+                    }
+                    return result;
+                }
+        });
+
+            $('#mask').click(function() {
+                $(this).hide();
+                $('#popup').hide();
+
+            });
+                /* 버튼 */
+            $('#back').click(() => {
+                location.href = '/main';
+            });
+            $('#reload').click(() => {
+                location.reload();
+            });
+            $('#user_menu').click(() => {
+            location.href = '/main';
+            });
+            $('.btn').click(function() {
+                var text = $(this).children('h1').text(),
+                    name = $('#popup').children('div').eq(0).children('h1').eq(0).text(),
+                    date = $('#date').val();
+
+                console.log(text,name,date);
+                /*  확인 삭제 ajax */
+                $.ajax({
+                        url:'/db_query',
+                        data: {date: date, name: name, id: user_id,text: text },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(flag) {
+                            location.reload();
+                        }
+                    });
+            })
+                 /* 로그인 관련 */
+            if(user_id) {
+                $('#login_btn').text('로그아웃');
+            }
+            /* 로그인 로그아웃 버튼 변경 */
+            $('#login_btn').click(function() {
+                if($(this).text() === '로그인') {
+                    location.href = '/login';
+                }
+                else {
+                    location.href = '/logout';
+                }
+            });
+    });
+        
+        </script>
+    </body>
+</html>
